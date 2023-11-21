@@ -1,4 +1,4 @@
-package com.jwt.web.json;
+package com.jwt.web.controller.json;
 
 public final class ResponseStatusCode {
     public static final int OK = 200;
