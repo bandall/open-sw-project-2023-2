@@ -3,6 +3,7 @@ package com.jwt.domin.login.jwt.token;
 import com.jwt.domin.login.dto.TokenInfo;
 import com.jwt.domin.login.dto.TokenValidationResult;
 import com.jwt.domin.member.Member;
+import com.jwt.domin.member.UserPrinciple;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -13,9 +14,16 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SecurityException;
 import java.security.Key;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 @Slf4j
 public class TokenProvider {
@@ -81,5 +89,19 @@ public class TokenProvider {
         return new TokenValidationResult(TokenStatus.TOKEN_EXPIRED, TokenType.ACCESS,
                 claims.get(TOKEN_ID_KEY, String.class),
                 null);
+    }
+
+    // access 토큰과 claim을 전달받아 UsernamePasswordAuthenticationToken을 생성해 전달
+    public Authentication getAuthentication(String token, Claims claims) {
+        Collection<? extends GrantedAuthority> authorities =
+                Arrays.stream(claims.get(AUTHORITIES_KEY).toString().split(","))
+                        .map(SimpleGrantedAuthority::new)
+                        .collect(Collectors.toList());
+
+        // 커스텀한 UserPrinciple 객체 사용 -> 이후 추가적인 데이터를 토큰에 넣을 경우 UserPrinciple 객체 및 이 클래스의 함수들 수정 필요
+        UserPrinciple principle = new UserPrinciple(claims.getSubject(), claims.get(USERNAME_KEY, String.class),
+                authorities);
+
+        return new UsernamePasswordAuthenticationToken(principle, token, authorities);
     }
 }
