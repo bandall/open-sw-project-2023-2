@@ -1,8 +1,10 @@
 package com.jwt.web.controller;
 
 import com.jwt.domin.login.LoginService;
+import com.jwt.domin.login.dto.TokenInfo;
 import com.jwt.domin.member.Member;
 import com.jwt.web.controller.dto.MemberCreateDto;
+import com.jwt.web.controller.dto.MemberLoginDto;
 import com.jwt.web.controller.json.ApiResponseJson;
 import jakarta.validation.Valid;
 import java.util.Map;
@@ -35,5 +37,18 @@ public class LoginController {
                 "email", member.getEmail(),
                 "username", member.getUsername()
         ));
+    }
+
+    @PostMapping("/api/account/auth")
+    public ApiResponseJson authenticateAccountAndIssueToken(@Valid @RequestBody MemberLoginDto memberLoginDto,
+                                                            BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            throw new IllegalArgumentException("잘못된 요청입니다.");
+        }
+
+        TokenInfo tokenInfoDto = loginService.loginMember(memberLoginDto.getEmail(), memberLoginDto.getPassword());
+        log.info("Token issued for account: {}", tokenInfoDto.getTokenId());
+
+        return new ApiResponseJson(HttpStatus.OK, tokenInfoDto);
     }
 }
