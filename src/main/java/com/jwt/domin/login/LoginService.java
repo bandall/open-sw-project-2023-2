@@ -64,6 +64,10 @@ public class LoginService {
         }
     }
 
+    public Member getUserInfo(String email) {
+        return findMemberByEmail(email);
+    }
+
     private Member findMemberByEmail(String email) {
         return memberRepository.findByEmail(email).orElseThrow(() -> {
             log.info("계정이 존재하지 않음");

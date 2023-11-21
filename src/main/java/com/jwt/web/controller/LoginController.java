@@ -57,6 +57,10 @@ public class LoginController {
 
     @GetMapping("/api/account/userinfo")
     public ApiResponseJson getUserInfo(@AuthenticationPrincipal UserPrinciple userPrinciple) {
-        return new ApiResponseJson(HttpStatus.OK, userPrinciple);
+        log.info("요청 이메일 : {}", userPrinciple.getEmail());
+
+        Member foundMember = loginService.getUserInfo(userPrinciple.getEmail());
+
+        return new ApiResponseJson(HttpStatus.OK, foundMember);
     }
 }
