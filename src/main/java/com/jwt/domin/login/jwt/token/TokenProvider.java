@@ -2,6 +2,7 @@ package com.jwt.domin.login.jwt.token;
 
 import com.jwt.domin.login.dto.TokenInfo;
 import com.jwt.domin.login.dto.TokenValidationResult;
+import com.jwt.domin.login.jwt.blacklist.AccessTokenBlackList;
 import com.jwt.domin.member.Member;
 import com.jwt.domin.member.UserPrinciple;
 import io.jsonwebtoken.Claims;
@@ -33,11 +34,14 @@ public class TokenProvider {
 
     private final Key hashKey;
     private final long accessTokenValidationInMilliseconds;
+    private final AccessTokenBlackList accessTokenBlackList;
 
-    public TokenProvider(String secrete, long accessTokenValidationInSeconds) {
+    public TokenProvider(String secrete, long accessTokenValidationInSeconds,
+                         AccessTokenBlackList accessTokenBlackList) {
         byte[] keyBytes = Decoders.BASE64.decode(secrete);
         this.hashKey = Keys.hmacShaKeyFor(keyBytes);
         this.accessTokenValidationInMilliseconds = accessTokenValidationInSeconds * 1000;
+        this.accessTokenBlackList = accessTokenBlackList;
     }
 
     public TokenInfo createToken(Member member) {
@@ -103,5 +107,14 @@ public class TokenProvider {
                 authorities);
 
         return new UsernamePasswordAuthenticationToken(principle, token, authorities);
+    }
+
+    public boolean isAccessTokenBlackList(String accessToken) {
+        if (accessTokenBlackList.isTokenBlackList(accessToken)) {
+            log.info("Blacklisted Access Token");
+            return true;
+        } else {
+            return false;
+        }
     }
 }

@@ -1,6 +1,7 @@
 package com.jwt.domin.login;
 
 import com.jwt.domin.login.dto.TokenInfo;
+import com.jwt.domin.login.jwt.blacklist.AccessTokenBlackList;
 import com.jwt.domin.login.jwt.token.TokenProvider;
 import com.jwt.domin.member.Member;
 import com.jwt.domin.member.MemberRepository;
@@ -25,6 +26,7 @@ public class LoginService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
     private final TokenProvider tokenProvider;
+    private final AccessTokenBlackList accessTokenBlackList;
 
     public Member createMember(MemberCreateDto memberCreateDto) {
         checkPasswordStrength(memberCreateDto.getPassword());
@@ -66,6 +68,10 @@ public class LoginService {
 
     public Member getUserInfo(String email) {
         return findMemberByEmail(email);
+    }
+
+    public void logout(String accessToken, String email) {
+        accessTokenBlackList.setBlackList(accessToken, email);
     }
 
     private Member findMemberByEmail(String email) {
