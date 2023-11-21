@@ -4,7 +4,10 @@ import com.jwt.web.controller.json.ApiResponseJson;
 import com.jwt.web.controller.json.ResponseStatusCode;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.TypeMismatchException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -26,6 +29,14 @@ public class ExceptionAdvice {
     public ApiResponseJson handleBadRequestException(Exception e) {
         return new ApiResponseJson(HttpStatus.BAD_REQUEST, ResponseStatusCode.WRONG_PARAMETER,
                 Map.of("errMsg", e.getMessage()));
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler({MethodArgumentNotValidException.class, TypeMismatchException.class,
+            HttpMessageNotReadableException.class})
+    public ApiResponseJson handleBadRequestBody() {
+        return new ApiResponseJson(HttpStatus.BAD_REQUEST, ResponseStatusCode.WRONG_PARAMETER,
+                Map.of("errMsg", "잘못된 요청입니다."));
     }
 
 }
